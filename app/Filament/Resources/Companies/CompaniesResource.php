@@ -9,7 +9,7 @@ use App\Filament\Resources\Companies\Pages\ViewCompanies;
 use App\Filament\Resources\Companies\Schemas\CompaniesForm;
 use App\Filament\Resources\Companies\Schemas\CompaniesInfolist;
 use App\Filament\Resources\Companies\Tables\CompaniesTable;
-use App\Models\Companies;
+use App\Models\Company;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CompaniesResource extends Resource
 {
-    protected static ?string $model = Companies::class;
+    protected static ?string $model = Company::class;
 
     protected static bool $shouldRegisterNavigation = false;
 

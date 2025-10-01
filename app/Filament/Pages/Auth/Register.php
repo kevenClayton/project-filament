@@ -59,7 +59,7 @@ class Register extends BaseRegister
 
     protected function getRedirectUrl(): string
     {
-        // Sempre redireciona para dashboard, que vai verificar se precisa ir para o wizard
-        return route('filament.admin.pages.dashboard');
+        // After registration, redirect to company wizard
+        return route('filament.admin.pages.company-wizard');
     }
 }

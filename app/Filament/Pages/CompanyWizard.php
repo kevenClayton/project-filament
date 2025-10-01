@@ -3,74 +3,59 @@
 namespace App\Filament\Pages;
 
 use App\Models\Company;
-use Filament\Actions\Action;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Contracts\HasActions;
+use BackedEnum;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Slider;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Wizard;
-use Filament\Schemas\Components\Wizard\Step;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Pages\Page;
 use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\Slider\Enums\PipsMode;
 
-class CompanyWizard extends Page implements HasForms, HasActions
+class CompanyWizard extends Page implements HasForms
 {
-    use InteractsWithForms, InteractsWithActions;
+    use InteractsWithForms;
 
-    protected static ?string $title = 'Dashboard';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
+
+    protected static ?string $title = 'Registo da Empresa';
+
     protected static bool $shouldRegisterNavigation = false;
 
+    public string $view = 'filament.pages.company-wizard';
 
-    public function getView(): string
-    {
-        return 'filament.pages.company-wizard';
-    }
+    public ?array $data = [];
 
     public function mount(): void
     {
         $user = Auth::user();
-        if ($user && (! $user->company_id || ! $user->company || ! $user->company->wizard_completed)) {
-            // Define a ação padrão que será aberta automaticamente
-            $this->mountAction('companyWizard');
+
+        // If user already has a completed company, redirect to dashboard
+        if ($user->company_id && $user->company?->wizard_completed) {
+            redirect()->route('filament.admin.pages.dashboard');
+            return;
+        }
+
+        // Load existing company data if available
+        if ($user->company_id && $user->company) {
+            $this->form->fill($user->company->toArray());
+        } else {
+            $this->form->fill();
         }
     }
 
-    protected function getHeaderActions(): array
+    public function form(Schema $schema): Schema
     {
-        $user = Auth::user();
-        $needsWizard = $user && (!$user->company_id || !$user->company || !$user->company->wizard_completed);
-
-        return [
-            $this->companyWizardAction()->hidden(fn() => !$needsWizard),
-        ];
-    }
-
-    public function companyWizardAction(): Action
-    {
-        return Action::make('companyWizard')
-            ->label('Configurar Empresa')
-            ->icon('heroicon-o-building-office')
-            ->color('primary')
-            ->size('sm')
-            ->modalHeading('Configuração da Empresa')
-            ->modalDescription('Complete as informações da sua empresa seguindo os steps')
-            ->modalWidth('7xl')
-            ->modalSubmitActionLabel('Salvar')
-            ->modalCancelAction(false)
-            ->modalCloseButton(false)
-            ->closeModalByClickingAway(false)
-            ->closeModalByEscaping(false)
-            ->form([
+        return $schema
+            ->schema([
                 Wizard::make([
                     Step::make('Perfil da Empresa')
                         ->icon('heroicon-o-building-office')
-                        // ->description('Informações básicas da empresa')
                         ->schema([
                             TextInput::make('name')
                                 ->label('Nome da Empresa')
@@ -122,7 +107,6 @@ class CompanyWizard extends Page implements HasForms, HasActions
 
                     Step::make('Tamanho e Política')
                         ->icon('heroicon-o-chart-bar')
-                        // ->description('Informações sobre o tamanho e políticas')
                         ->schema([
                             Radio::make('company_size')
                                 ->label('Tamanho da empresa (número de funcionários)')
@@ -133,7 +117,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'grande' => 'Grande (251+)',
                                 ])
                                 ->required()
-                                ->inline(),
+                                ->inline()
+                                ->columnSpanFull(),
 
                             Radio::make('sustainability_policy')
                                 ->label('A sua empresa possui uma política formal de sustentabilidade?')
@@ -143,12 +128,12 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'developing' => 'Em desenvolvimento',
                                     'none' => 'Não possui',
                                 ])
-                                ->required(),
+                                ->required()
+                                ->columnSpanFull(),
                         ]),
 
                     Step::make('Práticas Ambientais')
                         ->icon('heroicon-o-beaker')
-                        // ->description('Avaliação das práticas ambientais')
                         ->schema([
                             Slider::make('energy_efficiency')
                                 ->label('Medidas de eficiência energética')
@@ -157,9 +142,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->tooltips()
-                                ->pips(PipsMode::Steps)
-                                ->fillTrack(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             Slider::make('waste_reduction')
                                 ->label('Redução e reciclagem de resíduos')
@@ -168,9 +152,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->tooltips()
-                                ->pips(PipsMode::Steps)
-                                ->fillTrack(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             Slider::make('renewable_energy')
                                 ->label('Uso de energia renovável')
@@ -179,9 +162,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->tooltips()
-                                ->pips(PipsMode::Steps)
-                                ->fillTrack(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             Slider::make('sustainable_purchases')
                                 ->label('Compras com critérios sustentáveis')
@@ -190,9 +172,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->tooltips()
-                                ->pips(PipsMode::Steps)
-                                ->fillTrack(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             Slider::make('co2_reduction')
                                 ->label('Medidas para redução de emissões de CO2')
@@ -201,9 +182,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->tooltips()
-                                ->pips(PipsMode::Steps)
-                                ->fillTrack(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             Slider::make('water_reduction')
                                 ->label('Medidas para redução do consumo de água')
@@ -212,9 +192,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->tooltips()
-                                ->pips(PipsMode::Steps)
-                                ->fillTrack(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             Radio::make('environmental_monitoring')
                                 ->label('A empresa monitora seu desempenho ambiental?')
@@ -222,12 +201,13 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'indicators_reports' => 'Sim, com indicadores ou relatórios',
                                     'occasional' => 'Avaliado ocasionalmente',
                                     'none' => 'Não monitora',
-                                ]),
+                                ])
+                                ->required()
+                                ->columnSpanFull(),
                         ]),
 
                     Step::make('Responsabilidade Social')
                         ->icon('heroicon-o-users')
-                        // ->description('Práticas com funcionários')
                         ->schema([
                             CheckboxList::make('employee_practices')
                                 ->label('Quais das seguintes práticas com funcionários são implementadas pela sua empresa?')
@@ -238,12 +218,12 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'sustainability_training' => 'Capacitação em sustentabilidade',
                                     'none' => 'Nenhuma das anteriores',
                                 ])
-                                ->columns(2),
+                                ->columns(2)
+                                ->columnSpanFull(),
                         ]),
 
                     Step::make('ESG e Governança')
                         ->icon('heroicon-o-shield-check')
-                        // ->description('Questões de ESG e ética empresarial')
                         ->schema([
                             Radio::make('esg_responsible')
                                 ->label('Quem é responsável pelas questões ESG na empresa?')
@@ -252,7 +232,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'general_management' => 'Faz parte da gestão geral',
                                     'none' => 'Ninguém responsável atualmente',
                                 ])
-                                ->required(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             Radio::make('esg_goals')
                                 ->label('A empresa definiu metas mensuráveis de ESG?')
@@ -261,7 +242,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'informal' => 'Sim, mas informais',
                                     'none' => 'Não',
                                 ])
-                                ->required(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             Radio::make('esg_communication')
                                 ->label('Com que frequência sua empresa comunica suas ações de ESG?')
@@ -270,7 +252,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'occasional' => 'Ocasionalmente',
                                     'never' => 'Nunca',
                                 ])
-                                ->required(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             Radio::make('business_ethics')
                                 ->label('A sua empresa possui políticas de ética nos negócios?')
@@ -280,12 +263,12 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'developing' => 'Está em desenvolvimento',
                                     'none' => 'Não possui políticas específicas',
                                 ])
-                                ->required(),
+                                ->required()
+                                ->columnSpanFull(),
                         ]),
 
                     Step::make('Maturidade e Progresso')
                         ->icon('heroicon-o-presentation-chart-line')
-                        // ->description('Avaliação final da maturidade')
                         ->schema([
                             Slider::make('sustainability_maturity')
                                 ->label('Avalie o nível atual de maturidade da sua empresa em sustentabilidade')
@@ -294,12 +277,14 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->required(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             Radio::make('publishes_esg_reports')
                                 ->label('A empresa publica relatórios anuais de sustentabilidade (ESG)?')
                                 ->boolean()
-                                ->required(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             CheckboxList::make('esg_frameworks')
                                 ->label('Em que norma ou framework o relatório se baseia?')
@@ -312,8 +297,9 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'other' => 'Outra norma',
                                     'none_specific' => 'Não se baseia em norma específica',
                                 ])
-                                ->visible(fn($get) => $get('publishes_esg_reports'))
-                                ->columns(2),
+                                ->visible(fn ($get) => $get('publishes_esg_reports'))
+                                ->columns(2)
+                                ->columnSpanFull(),
 
                             Radio::make('sustainability_evolution')
                                 ->label('Como evoluiu a sustentabilidade vs ano anterior?')
@@ -323,7 +309,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'none' => 'Sem mudanças',
                                     'regression' => 'Regressão',
                                 ])
-                                ->required(),
+                                ->required()
+                                ->columnSpanFull(),
 
                             CheckboxList::make('sustainability_challenges')
                                 ->label('Maiores desafios para avançar em sustentabilidade (até 2):')
@@ -334,7 +321,8 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'low_market_demand' => 'Baixa demanda do mercado',
                                     'regulatory_uncertainty' => 'Incerteza regulatória',
                                 ])
-                                ->columns(2),
+                                ->columns(2)
+                                ->columnSpanFull(),
 
                             CheckboxList::make('sustainability_motivations')
                                 ->label('O que motiva as ações de sustentabilidade?')
@@ -345,45 +333,45 @@ class CompanyWizard extends Page implements HasForms, HasActions
                                     'stakeholder_pressure' => 'Pressão de stakeholders',
                                     'ethical_commitment' => 'Compromisso ético ou ambiental',
                                 ])
-                                ->columns(2),
+                                ->columns(2)
+                                ->columnSpanFull(),
                         ]),
                 ])
+                ->submitAction(view('filament.pages.company-wizard-submit-button'))
+                ->columnSpanFull(),
             ])
-            ->fillForm(function (): array {
-                $user = Auth::user();
-                if ($user && $user->company_id && $user->company) {
-                    return $user->company->toArray();
-                }
-                return [];
-            })
-            ->action(function (array $data): void {
-                $user = Auth::user();
+            ->statePath('data');
+    }
 
-                if ($user && $user->company_id && $user->company) {
-                    // Atualizar empresa existente
-                    $user->company->update(array_merge($data, [
-                        'wizard_completed' => true,
-                        'wizard_current_step' => 6,
-                    ]));
-                } else {
-                    // Criar nova empresa
-                    $company = Company::create(array_merge($data, [
-                        'wizard_completed' => true,
-                        'wizard_current_step' => 6,
-                        'accepted_rgpd' => true,
-                    ]));
+    public function submit(): void
+    {
+        $data = $this->form->getState();
+        $user = Auth::user();
 
-                    // Associar usuário à empresa
-                    $user->update(['company_id' => $company->id]);
-                }
+        if ($user->company_id && $user->company) {
+            // Update existing company
+            $user->company->update(array_merge($data, [
+                'wizard_completed' => true,
+                'wizard_current_step' => 6,
+            ]));
+        } else {
+            // Create new company
+            $company = Company::create(array_merge($data, [
+                'wizard_completed' => true,
+                'wizard_current_step' => 6,
+                'accepted_rgpd' => true,
+            ]));
 
-                Notification::make()
-                    ->title('Configuração da empresa concluída!')
-                    ->success()
-                    ->send();
+            // Associate user with company
+            $user->update(['company_id' => $company->id]);
+        }
 
-                // Redireciona para dashboard
-                $this->redirect(route('filament.admin.pages.dashboard'));
-            });
+        Notification::make()
+            ->title('Configuração da empresa concluída!')
+            ->success()
+            ->send();
+
+        // Redirect to dashboard
+        $this->redirect(route('filament.admin.pages.dashboard'));
     }
 }

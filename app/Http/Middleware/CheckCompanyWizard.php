@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckCompanyWizard
@@ -15,24 +16,24 @@ class CheckCompanyWizard
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Verificar se o usuário está autenticado
-        if (!\Illuminate\Support\Facades\Auth::check()) {
+        // Check if user is authenticated
+        if (!Auth::check()) {
             return $next($request);
         }
 
-        $user = \Illuminate\Support\Facades\Auth::user();
+        $user = Auth::user();
 
-        // Se já está na rota do wizard, permitir acesso
+        // Allow access to wizard routes
         if ($request->routeIs('filament.admin.pages.company-wizard*')) {
             return $next($request);
         }
 
-        // Se é rota de logout ou auth, permitir
+        // Allow access to auth routes (login, register, logout)
         if ($request->routeIs('filament.admin.auth.*') || $request->routeIs('logout')) {
             return $next($request);
         }
 
-        // Se não tem empresa ou não completou wizard, redireciona para wizard
+        // Check if user needs to complete wizard
         if (!$user->company_id || !$user->company || !$user->company->wizard_completed) {
             return redirect()->route('filament.admin.pages.company-wizard');
         }

@@ -1,0 +1,7 @@
+{
+    "validation.required": "Este campo é obrigatório.",
+    "The :attribute field is required.": "O campo :attribute é obrigatório.",
+    "The :attribute must be accepted.": "O :attribute deve ser aceite.",
+    "The :attribute field must be accepted.": "O campo :attribute deve ser aceite."
+}
+

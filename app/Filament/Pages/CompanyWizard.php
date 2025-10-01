@@ -23,7 +23,7 @@ class CompanyWizard extends Page implements HasForms
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
 
-    protected static ?string $title = 'Registo da Empresa';
+    protected static ?string $title = 'Onboarding';
 
     protected static bool $shouldRegisterNavigation = false;
 

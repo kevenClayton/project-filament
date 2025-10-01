@@ -26,6 +26,7 @@ class User extends Authenticatable
         'phone',
         'responsibility_sustainability',
         'company_id',
+        'is_admin',
     ];
 
     /**
@@ -49,6 +50,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'responsibility_sustainability' => 'boolean',
+            'is_admin' => 'boolean',
         ];
     }
 

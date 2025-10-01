@@ -14,6 +14,8 @@ class BoasPraticas extends Model
 
     protected $fillable = [
         'empresa_id',
+        'ods_objective_id',
+        'ods_goal_id',
         'titulo',
         'desafio_inicial',
         'ambito_atuacao',
@@ -41,5 +43,15 @@ class BoasPraticas extends Model
     public function empresa(): BelongsTo
     {
         return $this->belongsTo(Company::class, 'empresa_id');
+    }
+
+    public function odsObjective(): BelongsTo
+    {
+        return $this->belongsTo(OdsObjective::class, 'ods_objective_id');
+    }
+
+    public function odsGoal(): BelongsTo
+    {
+        return $this->belongsTo(OdsGoal::class, 'ods_goal_id');
     }
 }

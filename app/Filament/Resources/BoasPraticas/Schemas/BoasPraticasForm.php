@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\BoasPraticas\Schemas;
 
+use App\Models\OdsGoal;
+use App\Models\OdsObjective;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Get;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +28,29 @@ class BoasPraticasForm
                                 $user = Auth::user();
                                 return $user && $user->company_id ? $user->company_id : null;
                             }),
+
+                        Select::make('ods_objective_id')
+                            ->label('Objetivo ODS')
+                            ->options(OdsObjective::where('is_active', true)->orderBy('order')->pluck('title', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn (callable $set) => $set('ods_goal_id', null))
+                            ->helperText('Selecione o objetivo de desenvolvimento sustentável'),
+
+                        Select::make('ods_goal_id')
+                            ->label('Meta ODS')
+                            ->options(fn (Get $get) => OdsGoal::where('objective_id', $get('ods_objective_id'))
+                                ->where('is_active', true)
+                                ->orderBy('order')
+                                ->pluck('title', 'id')
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->disabled(fn (Get $get) => !$get('ods_objective_id'))
+                            ->helperText('Selecione a meta que pretende atingir'),
 
                         TextInput::make('titulo')
                             ->label('Título')

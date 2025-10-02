@@ -3,7 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Company;
-use App\Models\BoasPraticas;
+use App\Models\GoodPractice;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -12,7 +12,7 @@ class StatsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         $totalCompanies = Company::count();
-        $totalBoasPraticas = BoasPraticas::count();
+        $totalGoodPractices = GoodPractice::count();
 
         // Calcular maturidade ESG média (baseado no campo sustainability_maturity)
         $avgMaturity = Company::whereNotNull('sustainability_maturity')
@@ -26,7 +26,7 @@ class StatsOverview extends StatsOverviewWidget
                 ->color('success')
                 ->chart([7, 3, 4, 5, 6, 3, 5, 3]),
 
-            Stat::make('Boas Práticas', number_format($totalBoasPraticas, 0, ',', '.'))
+            Stat::make('Boas Práticas', number_format($totalGoodPractices, 0, ',', '.'))
                 ->description('Total de boas práticas registadas')
                 ->descriptionIcon('heroicon-m-light-bulb')
                 ->color('success')

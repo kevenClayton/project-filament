@@ -22,6 +22,7 @@ class Company extends Model
         'logo',
         'sustainability_policy_state',
         'accepted_rgpd',
+        'is_active',
 
         // Wizard fields
         'phone',
@@ -56,6 +57,7 @@ class Company extends Model
 
     protected $casts = [
         'accepted_rgpd' => 'boolean',
+        'is_active' => 'boolean',
         'knowledge_source' => 'array',
         'employee_practices' => 'array',
         'esg_frameworks' => 'array',
@@ -68,6 +70,11 @@ class Company extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    public function goodPractices(): HasMany
+    {
+        return $this->hasMany(GoodPractice::class, 'company_id');
     }
 
     public function isWizardCompleted(): bool

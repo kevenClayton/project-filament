@@ -16,6 +16,7 @@ use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Slider\Enums\PipsMode;
 
 class CompanyWizard extends Page implements HasForms
 {
@@ -24,12 +25,15 @@ class CompanyWizard extends Page implements HasForms
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
 
     protected static ?string $title = 'Onboarding';
+    protected ?string $heading = 'Onboarding';
+    protected ?string $subheading = 'Finalize o cadastro da sua empresa para continuar';
 
     protected static bool $shouldRegisterNavigation = false;
 
     public string $view = 'filament.pages.company-wizard';
 
     public ?array $data = [];
+
 
     public function mount(): void
     {
@@ -142,7 +146,8 @@ class CompanyWizard extends Page implements HasForms
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->required()
+                                ->pips(PipsMode::Steps)
+                                ->fillTrack()
                                 ->columnSpanFull(),
 
                             Slider::make('waste_reduction')
@@ -152,7 +157,8 @@ class CompanyWizard extends Page implements HasForms
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->required()
+                                ->pips(PipsMode::Steps)
+                                ->fillTrack()
                                 ->columnSpanFull(),
 
                             Slider::make('renewable_energy')
@@ -162,7 +168,8 @@ class CompanyWizard extends Page implements HasForms
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->required()
+                                ->pips(PipsMode::Steps)
+                                ->fillTrack()
                                 ->columnSpanFull(),
 
                             Slider::make('sustainable_purchases')
@@ -172,7 +179,8 @@ class CompanyWizard extends Page implements HasForms
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->required()
+                                ->pips(PipsMode::Steps)
+                                ->fillTrack()
                                 ->columnSpanFull(),
 
                             Slider::make('co2_reduction')
@@ -182,7 +190,8 @@ class CompanyWizard extends Page implements HasForms
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->required()
+                                ->pips(PipsMode::Steps)
+                                ->fillTrack()
                                 ->columnSpanFull(),
 
                             Slider::make('water_reduction')
@@ -192,7 +201,8 @@ class CompanyWizard extends Page implements HasForms
                                 ->maxValue(5)
                                 ->step(1)
                                 ->default(1)
-                                ->required()
+                                ->pips(PipsMode::Steps)
+                                ->fillTrack()
                                 ->columnSpanFull(),
 
                             Radio::make('environmental_monitoring')
@@ -204,6 +214,7 @@ class CompanyWizard extends Page implements HasForms
                                 ])
                                 ->required()
                                 ->columnSpanFull(),
+
                         ]),
 
                     Step::make('Responsabilidade Social')

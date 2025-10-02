@@ -32,6 +32,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->registration(Register::class)
+            ->brandLogo(asset('images/logotipo/lisboa.svg'))
+            ->darkModeBrandLogo(asset('images/logotipo/lisboa-branco.svg'))
+            ->brandLogoHeight('2.5rem')
             ->colors([
                 'primary' => Color::Amber,
             ])
